@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>{% block title %}Clima{% endblock %}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f7f8fb;
+      --surface: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --border: #e5e7eb;
+      --primary: #111827;
+    }
+    [data-theme="dark"] {
+      --bg: #0b1220;
+      --surface: #111827;
+      --text: #e5e7eb;
+      --muted: #94a3b8;
+      --border: #1f2937;
+      --primary: #e5e7eb;
+    }
+    html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+    body { background: var(--bg); color: var(--text); font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu, "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji"; }
+    .navbar { background: var(--surface) !important; border-bottom: 1px solid var(--border); }
+    .navbar .navbar-brand, .navbar .nav-link { color: var(--text) !important; }
+    .navbar .nav-link { opacity: .85; }
+    .navbar .nav-link:hover, .navbar .nav-link:focus { opacity: 1; }
+    .btn-primary { background: var(--primary); border-color: var(--primary); }
+    .btn-primary:hover { filter: brightness(0.92); }
+    .btn-secondary { background: #0f172a0d; color: var(--text); border-color: var(--border); }
+    .card { border: 1px solid var(--border); box-shadow: none !important; border-radius: 12px; }
+    .alert { border: 1px solid var(--border); border-radius: 10px; }
+    .form-control, .form-select, textarea.form-control { border: 1px solid var(--border); border-radius: 10px; background: var(--surface); }
+    .form-control:focus { box-shadow: none; border-color: #cbd5e1; }
+    main.container { max-width: 960px; }
+    footer { color: var(--muted); }
+    .theme-toggle.btn { border: 1px solid var(--border); background: var(--surface); color: var(--text); }
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-expand-md mb-4">
+    <div class="container">
+      <a class="navbar-brand fw-semibold" href="/">Clima</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav" aria-controls="nav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="nav">
+        <ul class="navbar-nav me-auto mb-2 mb-md-0">
+          {% if request.user.is_authenticated and request.resolver_match and request.resolver_match.url_name != 'jwt_login' %}
+            <li class="nav-item"><a class="nav-link" href="/">Buscar clima</a></li>
+            <li class="nav-item"><a class="nav-link" href="{% url 'top_ciudades' %}">Top ciudades</a></li>
+          {% endif %}
+        </ul>
+        <ul class="navbar-nav ms-auto align-items-center">
+          {% if request.user.is_authenticated %}
+            <li class="nav-item"><a class="nav-link" href="{% url 'profile' %}">Hola, {{ request.user.username }}</a></li>
+            <li class="nav-item"><a class="nav-link" href="{% url 'jwt_logout' %}">Salir</a></li>
+          {% else %}
+            <li class="nav-item"><a class="nav-link" href="{% url 'jwt_login' %}">Entrar</a></li>
+          {% endif %}
+          <li class="nav-item ms-2"><button id="theme-toggle" class="btn theme-toggle" type="button" title="Cambiar tema">🌙</button></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container">
+    {% if messages %}
+      <div class="mt-2">
+        {% for message in messages %}
+          <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+    {% block content %}{% endblock %}
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    (function() {
+      var key = 'theme';
+      var root = document.documentElement;
+      var toggle = document.getElementById('theme-toggle');
+      function apply(theme){ root.setAttribute('data-theme', theme); if(toggle){ toggle.textContent = (theme==='dark') ? '☀️' : '🌙'; toggle.setAttribute('aria-label', theme==='dark' ? 'Cambiar a claro' : 'Cambiar a oscuro'); } }
+      var stored = localStorage.getItem(key);
+      var preferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      var theme = stored || preferred;
+      apply(theme);
+      if(toggle){
+        toggle.addEventListener('click', function(){ theme = (root.getAttribute('data-theme')==='dark') ? 'light' : 'dark'; localStorage.setItem(key, theme); apply(theme); });
+      }
+    })();
+  </script>
+</body>
+</html>

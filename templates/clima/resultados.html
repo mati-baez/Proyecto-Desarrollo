@@ -1,0 +1,21 @@
+{% extends "clima/base.html" %}
+{% block title %}Resultados{% endblock %}
+
+{% block content %}
+  <div class="text-center">
+    {% if error %}
+        <div class="alert alert-danger">{{ error }}</div>
+    {% else %}
+        <h1 class="mb-3">Clima actual en {{ ciudad }}</h1>
+        <div class="card mx-auto" style="max-width: 400px;">
+            <div class="card-body">
+                <p class="card-text">🌡️ <strong>Temperatura:</strong> {{ clima.temperature }} °C</p>
+                <p class="card-text">💨 <strong>Viento:</strong> {{ clima.windspeed }} km/h</p>
+                <p class="card-text">🧭 <strong>Dirección:</strong> {{ clima.winddirection }}°</p>
+                <p class="card-text"><small class="text-muted">Hora: {{ clima.time }}</small></p>
+            </div>
+        </div>
+    {% endif %}
+    <a href="/" class="btn btn-secondary mt-4">Volver</a>
+  </div>
+{% endblock %}

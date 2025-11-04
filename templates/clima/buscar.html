@@ -1,0 +1,18 @@
+{% extends "clima/base.html" %}
+{% block title %}Buscar ciudad{% endblock %}
+
+{% block content %}
+  <div class="text-center">
+      <h1 class="mb-4">Consulta el clima</h1>
+      {% if form and form.errors %}
+        <div class="alert alert-danger text-start mx-auto" style="max-width: 480px;">
+          Por favor corregí los errores del formulario.
+        </div>
+      {% endif %}
+      <form method="POST" class="d-inline-flex gap-2">
+          {% csrf_token %}
+          <input class="form-control" style="max-width: 250px;" type="text" name="ciudad" placeholder="Ej: Buenos Aires" required>
+          <button class="btn btn-primary">Buscar</button>
+      </form>
+  </div>
+{% endblock %}

@@ -1,0 +1,117 @@
+{% extends "clima/base.html" %}
+{% block title %}Iniciar sesión{% endblock %}
+
+{% block content %}
+<style>
+  /* Que el login use todo el ancho disponible en esta página */
+  main.container { max-width: 100% !important; padding-left: 0; padding-right: 0; }
+  .auth-hero {
+    background: linear-gradient(135deg, rgba(59,130,246,.08), rgba(14,165,233,.08)), var(--surface);
+    border-right: 1px solid var(--border);
+    min-height: 60vh;
+  }
+  .weather-note { color: var(--muted); }
+  .login-wrap { max-width: 480px; width: 100%; }
+  .display-6 { font-weight: 600; }
+  .weather-emoji { font-size: 2.25rem; line-height: 1; }
+  @media (max-width: 991.98px){ .auth-hero { border-right: none; border-bottom: 1px solid var(--border); } }
+  input[type="text"], input[type="password"] { width: 100%; }
+  label.form-label { font-weight: 500; }
+  .divider-text { position: relative; text-align: center; color: var(--muted); }
+  .divider-text::before, .divider-text::after { content: ""; position: absolute; top: 50%; width: 35%; height: 1px; background: var(--border); }
+  .divider-text::before { left: 0; }
+  .divider-text::after { right: 0; }
+</style>
+
+<div class="container-fluid px-0">
+  <div class="row g-0 min-vh-75">
+    <!-- Panel clima / bienvenida -->
+    <div class="col-12 col-lg-6 p-5 p-lg-6 auth-hero d-flex flex-column justify-content-center">
+      <h2 class="display-6 mb-3">Bienvenido</h2>
+    
+      <div id="weather-card" class="card border-0" style="max-width: 440px;">
+        <div class="card-body">
+          <div class="d-flex align-items-center">
+            <div class="flex-grow-1">
+              <div class="small weather-note mb-1" id="weather-location">Tu ubicación</div>
+              <div class="fs-2"><span id="weather-temp">--</span> °C</div>
+              <div class="small weather-note" id="weather-wind">Viento: -- km/h</div>
+            </div>
+            <div class="ms-3 weather-emoji" id="weather-emoji">🌤️</div>
+          </div>
+        </div>
+      </div>
+      
+    </div>
+
+    <!-- Panel formulario -->
+    <div class="col-12 col-lg-6 d-flex align-items-center justify-content-center p-4 p-lg-5">
+      <div class="login-wrap">
+        <h1 class="h3 mb-4">Iniciar sesión</h1>
+        <form method="post" action="{% url 'jwt_login' %}" novalidate>
+          {% csrf_token %}
+          {% if error %}
+            <div class="alert alert-danger">{{ error }}</div>
+          {% endif %}
+          <div class="mb-3">
+            <label class="form-label">Usuario</label>
+            <input type="text" name="username" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Contraseña</label>
+            <input type="password" name="password" class="form-control" required>
+          </div>
+          <button class="btn btn-primary w-100">Entrar</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function(){
+    var elTemp = document.getElementById('weather-temp');
+    var elWind = document.getElementById('weather-wind');
+    var elLoc  = document.getElementById('weather-location');
+    var elEmoji= document.getElementById('weather-emoji');
+
+    function emojiFor(code){
+     
+      if(code === 0) return '☀️';
+      if([1,2,3].includes(code)) return '🌤️';
+      if(code >= 45 && code <= 48) return '🌫️';
+      if(code >= 51 && code <= 67) return '🌦️';
+      if(code >= 71 && code <= 77) return '🌨️';
+      if(code >= 80 && code <= 82) return '🌧️';
+      if(code >= 95) return '⛈️';
+      return '🌡️';
+    }
+
+    function showWeather(lat, lon, label){
+      fetch('https://api.open-meteo.com/v1/forecast?latitude='+lat+'&longitude='+lon+'&current_weather=true')
+        .then(r => r.json())
+        .then(d => {
+          var cw = (d || {}).current_weather || {};
+          if(typeof cw.temperature !== 'undefined') elTemp.textContent = cw.temperature;
+          if(typeof cw.windspeed !== 'undefined') elWind.textContent = 'Viento: '+cw.windspeed+' km/h';
+          if(typeof cw.weathercode !== 'undefined') elEmoji.textContent = emojiFor(cw.weathercode);
+          if(label) elLoc.textContent = label;
+        })
+        .catch(() => {});
+    }
+
+    if(navigator.geolocation){
+      navigator.geolocation.getCurrentPosition(function(pos){
+        var lat = pos.coords.latitude.toFixed(4);
+        var lon = pos.coords.longitude.toFixed(4);
+        showWeather(lat, lon, 'Tu ubicación');
+      }, function(){
+        showWeather(-34.6037, -58.3816, 'Buenos Aires');
+      }, { timeout: 5000 });
+    } else {
+      showWeather(-34.6037, -58.3816, 'Buenos Aires');
+    }
+  })();
+</script>
+{% endblock %}
+

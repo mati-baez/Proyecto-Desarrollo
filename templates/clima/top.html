@@ -1,0 +1,51 @@
+﻿{% extends "clima/base.html" %}
+{% block title %}Top ciudades{% endblock %}
+
+{% block content %}
+  <h1 class="mb-4 text-center">Top ciudades</h1>
+  <style>
+    .weather-emoji { font-size: 1.25rem; line-height: 1; }
+  </style>
+  <div class="row g-3">
+    {% for c in ciudades %}
+      <div class="col-12 col-sm-6 col-lg-4">
+        <div class="card h-100 shadow-sm">
+          <div class="card-body">
+            <h5 class="card-title d-flex justify-content-between align-items-center">
+              {{ c.nombre }}
+              <span class="weather-emoji" data-weathercode="{{ c.clima.weathercode|default:'' }}" aria-hidden="true">🌡️</span>
+            </h5>
+            {% if c.clima.temperature %}
+              <p class="card-text mb-1">Temperatura: <strong>{{ c.clima.temperature }} °C</strong></p>
+              <p class="card-text mb-1">Viento: {{ c.clima.windspeed }} km/h</p>
+              <p class="card-text"><small class="text-muted">Hora: {{ c.clima.time }}</small></p>
+            {% else %}
+              <div class="text-muted">No disponible en este momento.</div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+  <script>
+    (function(){
+      function emojiFor(code){
+        if(code === 0) return '☀️';
+        if([1,2,3].includes(code)) return '🌤️';
+        if(code >= 45 && code <= 48) return '🌫️';
+        if(code >= 51 && code <= 67) return '🌦️';
+        if(code >= 71 && code <= 77) return '🌨️';
+        if(code >= 80 && code <= 82) return '🌧️';
+        if(code >= 95) return '⛈️';
+        return '🌡️';
+      }
+      document.querySelectorAll('[data-weathercode]').forEach(function(el){
+        var raw = el.getAttribute('data-weathercode');
+        var code = parseInt(raw, 10);
+        if(!isNaN(code)) el.textContent = emojiFor(code);
+      });
+    })();
+  </script>
+{% endblock %}
+
+

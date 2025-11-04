@@ -1,0 +1,9 @@
+{% extends "clima/base.html" %}
+{% block title %}Sesión cerrada{% endblock %}
+
+{% block content %}
+<div class="text-center">
+  <div class="alert alert-info">Has cerrado sesión.</div>
+  <a class="btn btn-primary" href="{% url 'login' %}">Volver a entrar</a>
+{% endblock %}
+
